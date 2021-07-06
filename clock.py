@@ -104,16 +104,16 @@ class EPD_Clock(Clock):
         super().display()
 
         # use the RED channel as the red image
-        #  but convert it to 1-bit and invert it as the display draws "black" on white
+        #  but convert it to 1-bit as the display draws "black" on white
         #  and rotate it to match display orientation
-        redimage = ImageOps.invert(self.canvas.getchannel(
-            channel='R')).convert(mode='1', dither=Image.NONE).rotate(180)
+        redimage = self.canvas.getchannel(
+            channel='R').convert(mode='1', dither=Image.NONE).rotate(180)
 
         # use the BLUE channel as the black image
-        #  but convert it to 1-bit and invert it as the display draws "black" on white
+        #  but convert it to 1-bit as the display draws "black" on white
         #  and rotate it to match display orientation
-        blackimage = ImageOps.invert(self.canvas.getchannel(
-            channel='B')).convert(mode='1', dither=Image.NONE).rotate(180)
+        blackimage = self.canvas.getchannel(
+            channel='B').convert(mode='1', dither=Image.NONE).rotate(180)
         self.logger.debug('Starting display')
         self.epd.display(blackimage, redimage)
         self.logger.debug('Finished display, starting sleep')
@@ -136,6 +136,21 @@ class PIL_Clock(Clock):
         """Show the canvas to the user."""
         super().display()
         self.canvas.show()
+
+        # also demonstrate the EPD images:
+        # use the RED channel as the red image
+        #  but convert it to 1-bit as the display draws "black" on white
+        #  and rotate it to match display orientation
+        redimage = self.canvas.getchannel(
+            channel='R').convert(mode='1', dither=Image.NONE).rotate(180)
+        redimage.show()
+
+        # use the BLUE channel as the black image
+        #  but convert it to 1-bit as the display draws "black" on white
+        #  and rotate it to match display orientation
+        blackimage = self.canvas.getchannel(
+            channel='B').convert(mode='1', dither=Image.NONE).rotate(180)
+        blackimage.show()
 
 
 def get_config():

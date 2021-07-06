@@ -47,9 +47,6 @@ class Clock():
         self.small_font = ImageFont.truetype(font=config.get(
             'font', 'small_font'), size=config.getint('font', 'small_size'))
 
-    def make_canvas(self):
-        """Generate the canvas and draw attributes for later use."""
-
         self.canvas = Image.new('RGB', (self.width, self.height), 'WHITE')
         self.draw = ImageDraw.Draw(self.canvas)
 
@@ -140,7 +137,6 @@ class PIL_Clock(Clock):
         config -- a ConfigParser reference for configuration
         """
         super().__init__(config)
-        super().make_canvas()
 
     def display(self):
         """Show the canvas to the user."""

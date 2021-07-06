@@ -115,7 +115,7 @@ class EPD_Clock(Clock):
         blackimage = self.canvas.getchannel(
             channel='B').convert(mode='1', dither=Image.NONE).rotate(180)
         self.logger.debug('Starting display')
-        self.epd.display(blackimage, redimage)
+        self.epd.display(redimage, blackimage)
         self.logger.debug('Finished display, starting sleep')
         self.epd.EPD_Sleep()
         self.logger.debug('Finished sleep')

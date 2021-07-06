@@ -155,7 +155,7 @@ class EPD_Clock(Clock):
         elapsed = (arrow.now(self.tzinfo) - start).total_seconds()
         self.update_avg(elapsed)
         self.logger.debug(
-            f'Finished display in {elapsed:.3f}s (average {self.update_avg:.3f}s), starting sleep')
+            f'Finished display in {elapsed:.3f}s (average {float(self.update_avg):.3f}s), starting sleep')
         self.epd.EPD_Sleep()
         self.logger.debug('Finished sleep')
         pickle.dump(self.update_avg, open('update.pkl', 'wb'))

@@ -1,0 +1,65 @@
+[lib]
+dir = PATH TO WAVESHARE epd12in48b LIBRARY
+
+[host]
+target = HOSTNAME TARGET
+size = 1304x984
+erase = in 90 days
+
+[font]
+large_font = B612-Regular
+large_size = 240
+small_font = B612-Regular
+small_size = 50
+
+[loggers]
+keys=root,MAIN,CLOCK,EPD,PIL
+
+[handlers]
+keys=console,file
+
+[formatters]
+keys=format
+
+[logger_root]
+level=NOTSET
+handlers=console,file
+
+[logger_MAIN]
+level=NOTSET
+handlers=console,file
+propagate=0
+qualname=MAIN
+
+[logger_CLOCK]
+level=NOTSET
+handlers=console,file
+propagate=0
+qualname=CLOCK
+
+[logger_EPD]
+level=DEBUG
+handlers=console,file
+propagate=1
+qualname=CLOCK.EPD
+
+[logger_PIL]
+level=DEBUG
+handlers=console,file
+propagate=1
+qualname=CLOCK.PIL
+
+[handler_console]
+class=StreamHandler
+level=NOTSET
+formatter=format
+args=(sys.stdout,)
+
+[handler_file]
+class=logging.handlers.TimedRotatingFileHandler
+level=NOTSET
+formatter=format
+args=('clock.log', 'midnight')
+
+[formatter_format]
+format=%(asctime)s  %(name)s    %(levelname)s   %(message)s {%(filename)s:%(funcName)s:%(lineno)d}

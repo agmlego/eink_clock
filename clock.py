@@ -33,7 +33,7 @@ class Clock():
     def draw_time(self):
         """Generate the time display."""
 
-        time = arrow.get('2021-12-31T23:59:59')#arrow.now(self.tzinfo)
+        time = arrow.now(self.tzinfo)
 
         self.logger.debug(f'{time} drawing...')
 

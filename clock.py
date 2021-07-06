@@ -152,7 +152,7 @@ class EPD_Clock(Clock):
         self.logger.debug('Starting display')
         start = arrow.now(self.tzinfo)
         self.epd.display(redimage, blackimage)
-        elapsed = (arrow.now(self.tzinfo) - start)
+        elapsed = (arrow.now(self.tzinfo) - start).total_seconds()
         self.update_avg(elapsed)
         self.logger.debug(
             f'Finished display in {elapsed:.3f}s (average {self.update_avg:.3f}s), starting sleep')

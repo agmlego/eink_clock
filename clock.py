@@ -16,7 +16,7 @@ class Clock():
         config -- a ConfigParser reference for configuration
         """
         from datetime import datetime
-        self.logger = logging.getLogger('CLOCK')
+        self.logger = logging.getLogger('eink_clock')
         self.tzinfo = datetime.now().astimezone().tzinfo
         self.erase_offset = config.get('host', 'erase')
         self.width, self.height = map(
@@ -79,7 +79,6 @@ class EPD_Clock(Clock):
         import os
         import sys
         super().__init__(config)
-        self.logger = logging.getLogger('EPD')
         libdir = config.get('lib', 'dir')
         if os.path.exists(libdir):
             self.logger.debug(f'Library exists! {libdir}')
@@ -129,7 +128,6 @@ class PIL_Clock(Clock):
         config -- a ConfigParser reference for configuration
         """
         super().__init__(config)
-        self.logger = logging.getLogger('PIL')
         super().make_canvas()
 
     def display(self):
@@ -166,7 +164,7 @@ if __name__ == '__main__':
     config = get_config()
 
     logging.config.fileConfig(config)
-    logger = logging.getLogger('MAIN')
+    logger = logging.getLogger('eink_clock')
     logger.info('Starting!')
 
     target = config.get('host', 'target')

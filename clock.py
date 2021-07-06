@@ -35,7 +35,7 @@ class Clock():
 
         time = arrow.now(self.tzinfo)
 
-        self.logger.debug(f'{time} drawing...')
+        self.logger.debug('drawing...')
 
         # draw the day name in top dead center
         day = time.format('dddd')
@@ -74,7 +74,7 @@ class EPD_Clock(Clock):
 
         Keyword arguments:
         config -- a ConfigParser reference for configuration
-        claer -- a boolean indicating whether to clear the EPD first (default False)
+        clear -- a boolean indicating whether to clear the EPD first (default False)
         """
         import os
         import sys

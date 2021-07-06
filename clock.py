@@ -3,30 +3,53 @@
 
 import logging
 import logging.config
+import os
+import sys
+from datetime import datetime
+
 import arrow
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont
+
+try:
+    import epd12in48b
+except ModuleNotFoundError:
+    # not on an e-ink system; later factory check will load the right class
+    pass
 
 
 class Clock():
 
-    def __init__(self, config):
+    def __init__(self, config, size=None):
         """Make a base Clock that handles all the abstract drawing.
 
         Keyword arguments:
         config -- a ConfigParser reference for configuration
+        size -- a two-tuple of width, height (default None)
         """
-        from datetime import datetime
+
         self.logger = logging.getLogger('eink_clock')
+
+        # get local timezone information
         self.tzinfo = datetime.now().astimezone().tzinfo
+
         self.erase_offset = config.get('host', 'erase')
-        self.width, self.height = map(
-            int, config.get('host', 'size').split('x'))
+
+        # if the default was passed in, get the size from the config file
+        if size is None:
+            self.width, self.height = map(
+                int, config.get('host', 'size').split('x'))
+        # otherwise, unpack the tuple
+        else:
+            self.width, self.height = size
+
         self.large_font = ImageFont.truetype(font=config.get(
             'font', 'large_font'), size=config.getint('font', 'large_size'))
         self.small_font = ImageFont.truetype(font=config.get(
             'font', 'small_font'), size=config.getint('font', 'small_size'))
 
     def make_canvas(self):
+        """Generate the canvas and draw attributes for later use."""
+
         self.canvas = Image.new('RGB', (self.width, self.height), 'WHITE')
         self.draw = ImageDraw.Draw(self.canvas)
 
@@ -76,27 +99,16 @@ class EPD_Clock(Clock):
         config -- a ConfigParser reference for configuration
         clear -- a boolean indicating whether to clear the EPD first (default False)
         """
-        import os
-        import sys
-        super().__init__(config)
-        libdir = config.get('lib', 'dir')
-        if os.path.exists(libdir):
-            self.logger.debug(f'Library exists! {libdir}')
-            sys.path.append(libdir)
-            import epd12in48b
-        else:
-            self.logger.critical(f'No library??? {libdir}')
-            sys.exit(-100)
+
+        self.logger = logging.getLogger('eink_clock')
 
         self.epd = epd12in48b.EPD()
         self.epd.Init()
-        self.width = epd12in48b.EPD_WIDTH
-        self.height = epd12in48b.EPD_HEIGHT
-
         if clear:
             self.logger.info('Clearing display')
             self.epd.clear()
-        super().make_canvas()
+
+        super().__init__(config, (epd12in48b.EPD_WIDTH, epd12in48b.EPD_HEIGHT))
 
     def display(self):
         """Send the canvas to the display and then sleep."""
@@ -159,20 +171,17 @@ def get_config():
 
 
 if __name__ == '__main__':
-    import platform
-
     config = get_config()
 
     logging.config.fileConfig(config)
     logger = logging.getLogger('eink_clock')
     logger.info('Starting!')
 
-    target = config.get('host', 'target')
-    if platform.node() == target:
+    if 'epd12in48b' in sys.modules:
         eink = EPD_Clock(config)
     else:
         logger.warning(
-            f'Not e-ink on {target}, will use PIL simulation instead')
+            f'Not e-ink, will use PIL simulation instead')
         eink = PIL_Clock(config)
     eink.draw_time()
     eink.display()

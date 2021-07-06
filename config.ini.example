@@ -1,8 +1,4 @@
-[lib]
-dir = PATH TO WAVESHARE epd12in48b LIBRARY
-
 [host]
-target = HOSTNAME TARGET
 size = 1304x984
 erase = in 90 days
 

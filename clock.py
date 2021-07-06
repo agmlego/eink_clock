@@ -107,13 +107,13 @@ class EPD_Clock(Clock):
         #  but convert it to 1-bit and invert it as the display draws "black" on white
         #  and rotate it to match display orientation
         redimage = ImageOps.invert(self.canvas.getchannel(
-            channel='R').convert(mode='1', dither=Image.NONE)).rotate(180)
+            channel='R')).convert(mode='1', dither=Image.NONE).rotate(180)
 
         # use the BLUE channel as the black image
         #  but convert it to 1-bit and invert it as the display draws "black" on white
         #  and rotate it to match display orientation
         blackimage = ImageOps.invert(self.canvas.getchannel(
-            channel='B').convert(mode='1', dither=Image.NONE)).rotate(180)
+            channel='B')).convert(mode='1', dither=Image.NONE).rotate(180)
         self.logger.debug('Starting display')
         self.epd.display(blackimage, redimage)
         self.logger.debug('Finished display, starting sleep')

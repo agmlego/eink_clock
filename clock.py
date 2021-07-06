@@ -4,6 +4,7 @@
 import logging
 import logging.config
 import os
+import pickle
 import sys
 from datetime import datetime
 
@@ -15,6 +16,27 @@ try:
 except ModuleNotFoundError:
     # not on an e-ink system; later factory check will load the right class
     pass
+
+
+class RunningAverage():
+    """Track the running average of a value
+
+    Credit to Dima Lituiev for https://stackoverflow.com/a/62768606
+    """
+
+    def __init__(self):
+        self.average = 0
+        self.n = 0
+
+    def __call__(self, new_value):
+        self.n += 1
+        self.average = (self.average * (self.n-1) + new_value) / self.n
+
+    def __float__(self):
+        return self.average
+
+    def __repr__(self):
+        return "average: " + str(self.average)
 
 
 class Clock():
@@ -105,6 +127,11 @@ class EPD_Clock(Clock):
             self.logger.info('Clearing display')
             self.epd.clear()
 
+        try:
+            self.update_avg = pickle.load(open('update.pkl', 'rb'))
+        except FileNotFoundError:
+            self.update_avg = RunningAverage()
+
         super().__init__(config, (epd12in48b.EPD_WIDTH, epd12in48b.EPD_HEIGHT))
 
     def display(self):
@@ -123,10 +150,15 @@ class EPD_Clock(Clock):
         blackimage = self.canvas.getchannel(
             channel='B').convert(mode='1', dither=Image.NONE).rotate(180)
         self.logger.debug('Starting display')
+        start = arrow.now(self.tzinfo)
         self.epd.display(redimage, blackimage)
-        self.logger.debug('Finished display, starting sleep')
+        elapsed = (arrow.now(self.tzinfo) - start)
+        self.update_avg(elapsed)
+        self.logger.debug(
+            f'Finished display in {elapsed:.3f}s (average {self.update_avg:.3f}s), starting sleep')
         self.epd.EPD_Sleep()
         self.logger.debug('Finished sleep')
+        pickle.dump(self.update_avg, open('update.pkl', 'wb'))
 
 
 class PIL_Clock(Clock):

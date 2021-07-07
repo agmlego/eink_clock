@@ -1,5 +1,6 @@
 #!/usr/bin/python
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: FAFOL
 
 import logging
 import logging.config

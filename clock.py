@@ -243,7 +243,7 @@ class EPD_Clock(Clock):
         """
 
         self.logger = logging.getLogger('eink_clock')
-
+        self.portrait = portrait
         self.epd = epd12in48b.EPD()
         self.epd.Init()
         if clear:
@@ -262,17 +262,21 @@ class EPD_Clock(Clock):
         """Send the canvas to the display and then sleep."""
         super().display()
 
+        rotate = 180
+        if self.portrait:
+            rotate = 90
+
         # use the RED channel as the red image
         #  but convert it to 1-bit as the display draws "black" on white
         #  and rotate it to match display orientation
         redimage = self.canvas.getchannel(
-            channel='R').convert(mode='1', dither=Image.NONE).rotate(180)
+            channel='R').convert(mode='1', dither=Image.NONE).rotate(rotate, expand=True)
 
         # use the BLUE channel as the black image
         #  but convert it to 1-bit as the display draws "black" on white
         #  and rotate it to match display orientation
         blackimage = self.canvas.getchannel(
-            channel='B').convert(mode='1', dither=Image.NONE).rotate(180)
+            channel='B').convert(mode='1', dither=Image.NONE).rotate(rotate, expand=True)
         self.logger.debug('Starting display')
         start = arrow.now(self.tzinfo)
         self.epd.display(redimage, blackimage)

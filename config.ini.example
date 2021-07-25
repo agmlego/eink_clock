@@ -7,6 +7,8 @@ large_font = B612-Regular
 large_size = 240
 small_font = B612-Regular
 small_size = 50
+tiny_font = B612Mono-Regular
+tiny_size = 32
 
 [loggers]
 keys=root

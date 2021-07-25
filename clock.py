@@ -112,6 +112,8 @@ class Clock():
             'font', 'large_font'), size=config.getint('font', 'large_size'))
         self.small_font = ImageFont.truetype(font=config.get(
             'font', 'small_font'), size=config.getint('font', 'small_size'))
+        self.tiny_font = ImageFont.truetype(font=config.get(
+            'font', 'tiny_font'), size=config.getint('font', 'tiny_size'))
 
         self.canvas = Image.new('RGB', (self.width, self.height), 'WHITE')
         self.draw = ImageDraw.Draw(self.canvas)
@@ -154,7 +156,7 @@ class Clock():
 
         today = arrow.now(self.tzinfo)
 
-        TABSIZE = 3
+        TABSIZE = 4
 
         # four-month view: last month, this month, and next two
         months = [
@@ -170,17 +172,17 @@ class Clock():
             month_d = render_month(month)
             month_header = month.format('MMMM YYYY')
             self.draw.text((self.width/2, top), month_header,
-                           font=self.small_font, fill='RED', anchor='ma')
-            _, h = self.draw.textsize(month_header, font=self.small_font)
-            top += h
+                           font=self.tiny_font, fill='RED', anchor='ma')
+            _, h = self.draw.textsize(month_header, font=self.tiny_font)
+            top += h + 15
             self.logger.debug(f'{month_header},{top}')
             header = ('#\t'+calendar.weekheader(2).replace(' ', '\t')
                       ).expandtabs(TABSIZE)
-            w, h = self.draw.textsize(header, font=self.small_font)
+            w, h = self.draw.textsize(header, font=self.tiny_font)
             w = (self.width+w)/2
-            self.draw.text((w, top), header, font=self.small_font,
+            self.draw.text((w, top), header, font=self.tiny_font,
                            fill='RED', anchor='ra')
-            top += h
+            top += h + 10
             self.logger.debug(f'{header},{top}')
 
             for weeknum, week in month_d.items():
@@ -189,16 +191,16 @@ class Clock():
                     if day:
                         week_str.append(f'{day:2d}')
                     else:
-                        week_str.append(f'{99:2d}')
+                        week_str.append(' '*2)
                 week_str = ('\t'.join(week_str))
 
                 week_str = f'{weeknum}\t{week_str}'.expandtabs(TABSIZE)
                 self.draw.text((w, top), week_str,
-                               font=self.small_font, fill='BLUE', anchor='ra')
-                _, h = self.draw.textsize(week_str, font=self.small_font)
-                top += h
+                               font=self.tiny_font, fill='BLUE', anchor='ra')
+                _, h = self.draw.textsize(week_str, font=self.tiny_font)
+                top += h + 10
                 self.logger.debug(f'{week_str},{top}')
-            top += 10
+            top += 20
             self.logger.debug(f'End of month,{top}')
 
     def display(self):

@@ -177,7 +177,7 @@ class Clock():
             self.draw.text((self.width/2, top), month_header,
                            font=self.tiny_font, fill='RED', anchor='ma')
             _, h = self.draw.textsize(month_header, font=self.tiny_font)
-            top += h + 15
+            top += h + 10
 
             # draw day names
             header = ('#\t\t'+calendar.weekheader(2).replace(' ', '\t')

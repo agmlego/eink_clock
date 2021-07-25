@@ -5,14 +5,12 @@
 import calendar
 import logging
 import logging.config
-import os
 import pickle
 import sys
 from datetime import datetime
 
 import arrow
 from PIL import Image, ImageDraw, ImageFont
-import tabulate
 
 try:
     import epd12in48b
@@ -64,7 +62,7 @@ def render_month(month: arrow):
         month (arrow): first day of month to format
 
     Returns:
-        dict: keys of ISO weeknumbers, keys of abbreviated day names, with values of day numbers
+        dict: keys of ISO weeknumbers, keys of abbreviated day names, with values of arrow days
     """
     month_d = {}
     for day in arrow.Arrow.range('day', month, month.shift(months=+1)):
@@ -73,7 +71,7 @@ def render_month(month: arrow):
         weeknum = iso_week_num(day)
         if weeknum not in month_d:
             month_d[weeknum] = ['']*7
-        month_d[weeknum][day.isoweekday()-1] = day.day
+        month_d[weeknum][day.isoweekday()-1] = day
     return month_d
 
 
@@ -103,6 +101,7 @@ class Clock():
         else:
             self.width, self.height = size
 
+        # if this should be portrait, swap the axes
         if portrait:
             temp = self.width
             self.width = self.height
@@ -157,6 +156,8 @@ class Clock():
         today = arrow.now(self.tzinfo)
 
         TABSIZE = 4
+        GAP = 5
+        LINE_WIDTH = 2
 
         # four-month view: last month, this month, and next two
         months = [
@@ -170,38 +171,61 @@ class Clock():
         top = 0
         for month in months:
             month_d = render_month(month)
+
+            # draw month header
             month_header = month.format('MMMM YYYY')
             self.draw.text((self.width/2, top), month_header,
                            font=self.tiny_font, fill='RED', anchor='ma')
             _, h = self.draw.textsize(month_header, font=self.tiny_font)
             top += h + 15
-            self.logger.debug(f'{month_header},{top}')
-            header = ('#\t'+calendar.weekheader(2).replace(' ', '\t')
+
+            # draw day names
+            header = ('#\t\t'+calendar.weekheader(2).replace(' ', '\t')
                       ).expandtabs(TABSIZE)
             w, h = self.draw.textsize(header, font=self.tiny_font)
             w = (self.width+w)/2
             self.draw.text((w, top), header, font=self.tiny_font,
                            fill='RED', anchor='ra')
             top += h + 10
-            self.logger.debug(f'{header},{top}')
 
+            # for each week, draw it out with padding
             for weeknum, week in month_d.items():
                 week_str = []
                 for day in week:
                     if day:
-                        week_str.append(f'{day:2d}')
+                        week_str.append(f'{day.day:2d}')
                     else:
                         week_str.append(' '*2)
                 week_str = ('\t'.join(week_str))
 
-                week_str = f'{weeknum}\t{week_str}'.expandtabs(TABSIZE)
+                week_str = f'{weeknum}\t\t{week_str}'.expandtabs(TABSIZE)
                 self.draw.text((w, top), week_str,
                                font=self.tiny_font, fill='BLUE', anchor='ra')
-                _, h = self.draw.textsize(week_str, font=self.tiny_font)
+                ww, h = self.draw.textsize(week_str, font=self.tiny_font)
+
+                # draw a symbol next to the week number if it is this week
+                if iso_week_num(today) == weeknum and month.month == today.month:
+                    www, _ = self.draw.textsize('★', font=self.tiny_font)
+                    column_start = w-ww
+                    self.draw.text((column_start-www, top), '★',
+                                   font=self.tiny_font, fill='RED', anchor='ra')
+
+                    # also draw a box around today
+                    offset, _ = self.draw.textsize(
+                        ('  \t\t' + '\t'.join(['  ']*(today.isoweekday()))).expandtabs(TABSIZE), font=self.tiny_font)
+                    width, height = self.draw.textsize(
+                        str(today.day), font=self.tiny_font)
+                    
+                    # figure out location
+                    x0 = column_start + offset - width - GAP
+                    x1 = column_start + offset + GAP
+                    y0 = top - GAP/2
+                    y1 = top + height + GAP*3/2
+                    self.draw.rounded_rectangle(
+                        ((x0, y0), (x1, y1)), outline='RED', width=LINE_WIDTH, radius=GAP)
+
                 top += h + 10
-                self.logger.debug(f'{week_str},{top}')
             top += 20
-            self.logger.debug(f'End of month,{top}')
 
     def display(self):
         """Display the canvas to user."""

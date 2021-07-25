@@ -4,13 +4,7 @@
 
 import logging
 import logging.config
-import os
-import pickle
 import sys
-from datetime import datetime
-
-import arrow
-from PIL import Image, ImageDraw, ImageFont
 
 import clock
 

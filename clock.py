@@ -264,7 +264,7 @@ class EPD_Clock(Clock):
 
         rotate = 180
         if self.portrait:
-            rotate = 90
+            rotate = 270
 
         # use the RED channel as the red image
         #  but convert it to 1-bit as the display draws "black" on white

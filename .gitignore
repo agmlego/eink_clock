@@ -2,4 +2,4 @@
 .vscode
 *.pyc
 config.ini
-*.log
+*.log*
